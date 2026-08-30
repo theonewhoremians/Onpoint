@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OnPoint — Trading Calendar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05060a;
+    --gold:#dea842;
+    --gold-bright:#e8c07a;
+    --gold-dim:#8A7239;
+    --green:#38d99b;
+    --green-dim:rgba(69, 180, 138, 0.16);
+    --red:#e24634;
+    --red-dim:rgba(238, 83, 66, 0.16);
+    --amber:#d9a24a;
+    --violet:#a486e4;
+    --text:#F4F6FB;
+    --text-mid:#B9C2D6;
+    --text-dim:#7b7d81;
+    --radius:24px;
+    --glass:rgba(255,255,255,0.06);
+    --glass-strong:rgba(255,255,255,0.1);
+    --glass-border:rgba(255,255,255,0.14);
+    --glass-specular:rgba(255,255,255,.28);
+    --glass-refract:rgba(178,203,255,.055);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:var(--bg);}
+  body{
+    min-height:100vh; background:
+      radial-gradient(ellipse 95% 65% at 50% -14%,rgba(222,168,66,.34),transparent 70%),
+      radial-gradient(ellipse 70% 60% at 108% 20%,rgba(56,217,155,.28),transparent 66%),
+      radial-gradient(ellipse 75% 60% at -10% 80%,rgba(164,134,228,.28),transparent 66%),
+      radial-gradient(ellipse 60% 50% at 92% 98%,rgba(226,70,52,.2),transparent 64%),
+      linear-gradient(165deg,#0a0b0f 0%,#06070a 46%,#040405 100%); color:var(--text);
+    font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased;
+    padding-bottom:60px; position:relative; overflow-x:hidden;
+  }
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse 70% 45% at 50% 18%,rgba(255,255,255,.018),transparent 72%)}
+  body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.5;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .ambient-stage{position:fixed;inset:-8%;z-index:-2;pointer-events:none;overflow:hidden;perspective:1000px;transform-style:preserve-3d;transform:rotateX(var(--tilt-y,0deg)) rotateY(var(--tilt-x,0deg)) scale(1.04);transition:transform .7s cubic-bezier(.2,.8,.2,1);contain:strict}
+  .orb{position:absolute;border-radius:46% 54% 63% 37% / 42% 39% 61% 58%;filter:blur(44px);opacity:.44;transform-style:preserve-3d;will-change:transform;}
+  .orb::before{content:'';position:absolute;inset:13%;border-radius:inherit;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.62),rgba(255,255,255,.06) 24%,transparent 62%);filter:blur(8px);opacity:.7}
+  .orb::after{content:'';position:absolute;inset:-8%;border-radius:inherit;border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 0 70px rgba(255,255,255,.08),0 0 90px currentColor;opacity:.28}
+  .orb1{width:620px;height:620px;top:-280px;left:-210px;color:#c3943f;background:radial-gradient(circle at 36% 34%,#d4ac63 0%,#75511f 33%,rgba(104,70,20,.12) 68%,transparent 74%);animation:orbOne 20s ease-in-out infinite alternate}
+  .orb2{width:560px;height:560px;top:7%;right:-260px;color:#2f9371;background:radial-gradient(circle at 58% 36%,#52bd91 0%,#15543f 34%,rgba(20,82,63,.13) 68%,transparent 74%);animation:orbTwo 24s ease-in-out infinite alternate}
+  .orb3{width:540px;height:540px;bottom:-290px;left:18%;color:#a94f45;background:radial-gradient(circle at 50% 44%,#c96859 0%,#622923 36%,rgba(101,40,31,.12) 70%,transparent 76%);animation:orbThree 22s ease-in-out infinite alternate}
+  .orb4{width:500px;height:500px;bottom:2%;right:2%;color:#665aa0;background:radial-gradient(circle at 48% 44%,#8375bf 0%,#392f62 36%,rgba(57,47,98,.12) 70%,transparent 76%);animation:orbFour 26s ease-in-out infinite alternate}
+  @keyframes orbOne{0%{transform:translate3d(-4%,-3%,40px) rotate(-8deg) scale(.96)}50%{transform:translate3d(11%,8%,110px) rotate(9deg) scale(1.08)}100%{transform:translate3d(2%,18%,70px) rotate(18deg) scale(1.01)}}
+  @keyframes orbTwo{0%{transform:translate3d(4%,-7%,80px) rotate(12deg) scale(1.02)}48%{transform:translate3d(-14%,12%,150px) rotate(-10deg) scale(1.12)}100%{transform:translate3d(-5%,-3%,95px) rotate(-20deg) scale(.96)}}
+  @keyframes orbThree{0%{transform:translate3d(-5%,8%,55px) rotate(-12deg) scale(.96)}52%{transform:translate3d(18%,-13%,125px) rotate(14deg) scale(1.1)}100%{transform:translate3d(7%,-4%,80px) rotate(25deg) scale(1.03)}}
+  @keyframes orbFour{0%{transform:translate3d(8%,8%,120px) rotate(9deg) scale(.94)}46%{transform:translate3d(-16%,-10%,65px) rotate(-17deg) scale(1.1)}100%{transform:translate3d(-3%,12%,135px) rotate(21deg) scale(1.02)}}
+
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .wrap{max-width:1280px; margin:0 auto; padding:0 28px; position:relative; z-index:1;}
+
+  .glass{
+    background:
+      radial-gradient(130% 130% at 0% 0%,rgba(255,255,255,.052),transparent 40%),
+      radial-gradient(95% 110% at 102% 104%,rgba(222,168,66,.045),transparent 58%),
+      linear-gradient(150deg,rgba(30,32,32,.39),rgba(7,8,8,.27));
+    backdrop-filter:blur(30px) saturate(150%);-webkit-backdrop-filter:blur(30px) saturate(150%);
+    border:1px solid var(--glass-border);border-radius:var(--radius);
+    box-shadow:0 30px 90px rgba(0,0,0,.5),0 3px 14px rgba(0,0,0,.32),inset 0 1px 0 var(--glass-specular),inset 1px 0 0 rgba(255,255,255,.035),inset 0 -1px 0 rgba(255,255,255,.025),inset 0 0 22px var(--glass-refract);
+    position:relative;isolation:isolate;
+  }
+  .glass::before{
+    content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;
+    background:linear-gradient(120deg,rgba(255,255,255,.115) 0%,rgba(255,255,255,.022) 16%,transparent 40%),linear-gradient(295deg,rgba(255,255,255,.045) 0%,transparent 22%);opacity:.68;
+  }
+  .glass::after{content:'';position:absolute;inset:1px;border-radius:calc(var(--radius) - 1px);pointer-events:none;z-index:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.018);background:radial-gradient(560px circle at 50% 0%,rgba(255,255,255,.035),transparent 45%)}
+  .glass>*{position:relative;z-index:1}
+
+  .app-topbar{max-width:1280px;margin:16px auto 0;padding:8px 28px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+  .wordmark{font:700 23px 'Bricolage Grotesque',sans-serif;letter-spacing:-.045em}
+  .wordmark span{color:var(--gold)}
+  .nav-tabs{display:flex;gap:5px;border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:4px;background:rgba(10,11,11,.54);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 26px rgba(0,0,0,.22)}
+  .nav-btn{border:0;background:transparent;color:var(--text-dim);border-radius:8px;padding:8px 12px;font:11px 'Inter',sans-serif;cursor:pointer}
+  .nav-btn.active,.nav-btn:hover{background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.055));box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 5px 16px rgba(0,0,0,.18);color:var(--text)}
+
+  .hero{ padding:36px 0 8px 0; position:relative; }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--gold-bright); display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .eyebrow::before{content:''; width:7px; height:7px; border-radius:50%; background:var(--gold-bright); box-shadow:0 0 12px var(--gold-bright);}
+  h1{
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:clamp(26px,3.6vw,38px);
+    letter-spacing:-0.01em; line-height:1.05; text-shadow:0 2px 24px rgba(0,0,0,0.4);
+  }
+  .hero-sub{color:var(--text-mid); font-size:14px; margin-top:8px; max-width:640px;}
+
+  .kpi-strip{display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-top:28px;}
+  @media(max-width:1080px){.kpi-strip{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:560px){.kpi-strip{grid-template-columns:repeat(2,1fr);}}
+  .kpi{ padding:18px 18px 15px 18px; border-radius:20px; transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+  .kpi:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.16);box-shadow:0 30px 85px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.12)}
+  .kpi .label{font-size:11px; color:#B8BFCC; font-weight:600; text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px; text-shadow:0 1px 8px rgba(0,0,0,.72);}
+  .kpi .val{font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:600;}
+  .kpi .val.pos{color:var(--green);} .kpi .val.neg{color:var(--red);}
+  .kpi .sub{font-size:11.5px; color:var(--text-mid); margin-top:4px;}
+
+  .cal-toolbar{
+    display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    padding:16px 22px; margin:26px 0 18px 0; border-radius:22px;
+  }
+  .month-nav{display:flex; align-items:center; gap:14px;}
+  .month-btn{
+    width:36px; height:36px; border-radius:12px; border:1px solid var(--glass-border);
+    background:rgba(255,255,255,0.06); color:var(--text); font-size:16px; cursor:pointer;
+    display:grid; place-items:center; transition:.15s;
+  }
+  .month-btn:hover{background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.3);}
+  .month-label{font-family:'Bricolage Grotesque',sans-serif; font-weight:650; font-size:19px; min-width:190px; text-align:center;}
+  .today-btn{
+    background:rgba(232,194,122,0.14); border:1px solid rgba(232,194,122,0.35); color:var(--gold-bright);
+    border-radius:14px; padding:9px 16px; font-size:12.5px; font-family:'JetBrains Mono',monospace;
+    cursor:pointer; transition:.15s;
+  }
+  .today-btn:hover{background:rgba(232,194,122,0.24); border-color:var(--gold);}
+  .legend{display:flex; align-items:center; gap:16px; font-size:11.5px; color:var(--text-mid);}
+  .legend-item{display:flex; align-items:center; gap:6px;}
+  .legend-dot{width:9px;height:9px;border-radius:3px;}
+  .legend-dot.pos{background:var(--green); box-shadow:0 0 10px rgba(56,217,155,.5);}
+  .legend-dot.neg{background:var(--red); box-shadow:0 0 10px rgba(226,70,52,.5);}
+  .legend-dot.flat{background:rgba(255,255,255,.25);}
+
+  .cal-shell{ padding:20px; }
+  .dow-head{display:grid; grid-template-columns:repeat(7,1fr); gap:10px; margin-bottom:10px;}
+  .dow-head div{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); text-align:center; padding-bottom:4px;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:10px;}
+  .day-cell{
+    min-height:104px; border-radius:16px; padding:10px 12px; position:relative; cursor:pointer;
+    border:1px solid rgba(255,255,255,0.09);
+    background:linear-gradient(150deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+    backdrop-filter:blur(8px) saturate(125%); -webkit-backdrop-filter:blur(8px) saturate(125%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+    transition:.2s; display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .day-cell:hover{transform:translateY(-2px); border-color:rgba(255,255,255,.24); box-shadow:0 18px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.1);}
+  .day-cell.outside{opacity:.32; cursor:default;}
+  .day-cell.outside:hover{transform:none; box-shadow:inset 0 1px 0 rgba(255,255,255,.08);}
+  .day-cell.win{background:linear-gradient(150deg, rgba(56,217,155,.16), rgba(255,255,255,.02)); border-color:rgba(56,217,155,.32);}
+  .day-cell.loss{background:linear-gradient(150deg, rgba(226,70,52,.16), rgba(255,255,255,.02)); border-color:rgba(226,70,52,.32);}
+  .day-cell.today{border-color:var(--gold); box-shadow:0 0 0 1px rgba(222,168,66,.5), inset 0 1px 0 rgba(255,255,255,.1);}
+  .day-num{font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--text-mid); display:flex; align-items:center; justify-content:space-between;}
+  .day-num .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);display:none;}
+  .day-cell.today .day-num .dot{display:block;}
+  .day-pnl{font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:17px; margin-top:6px;}
+  .day-pnl.pos{color:var(--green); text-shadow:0 0 16px rgba(95,227,176,0.3);}
+  .day-pnl.neg{color:var(--red); text-shadow:0 0 16px rgba(240,119,106,0.3);}
+  .day-meta{font-size:10.5px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; margin-top:auto; padding-top:6px;}
+
+  .week-summary-row{display:contents;}
+  .week-tag{
+    grid-column:1/-1; display:flex; align-items:center; gap:12px; padding:2px 4px 2px 4px; margin-top:2px;
+  }
+  .week-tag .wk-label{font:10px 'JetBrains Mono',monospace; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; white-space:nowrap;}
+  .week-tag .wk-line{flex:1; height:1px; background:rgba(255,255,255,.08);}
+  .week-tag .wk-val{font:600 12px 'JetBrains Mono',monospace;}
+  .week-tag .wk-val.pos{color:var(--green);} .week-tag .wk-val.neg{color:var(--red);}
+
+  .side-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:26px;}
+  @media(max-width:920px){.side-grid{grid-template-columns:1fr;}}
+  .panel{ padding:24px; }
+  .panel .section-title{font-family:'Bricolage Grotesque',sans-serif; font-size:16px; font-weight:650; color:#F5F6F8; margin-bottom:16px;}
+
+  .streak-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px dashed rgba(255,255,255,0.1);}
+  .streak-row:first-of-type{border-top:none;}
+  .streak-row .slabel{font-size:12.5px; color:var(--text-mid);}
+  .streak-row .sval{font-family:'JetBrains Mono',monospace; font-size:13.5px; font-weight:600;}
+  .streak-row .sval.pos{color:var(--green);} .streak-row .sval.neg{color:var(--red);}
+
+  .day-detail{ padding:24px; }
+  .day-detail .dd-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;}
+  .day-detail .dd-title{font-family:'Bricolage Grotesque',sans-serif; font-size:18px; font-weight:650;}
+  .day-detail .dd-pnl{font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700;}
+  .day-detail .dd-pnl.pos{color:var(--green);} .day-detail .dd-pnl.neg{color:var(--red);}
+  .trade-row{display:grid; grid-template-columns:1fr auto auto; gap:10px; align-items:center; padding:10px 0; border-top:1px dashed rgba(255,255,255,0.1); font-size:12.5px;}
+  .trade-row:first-of-type{border-top:none;}
+  .trade-row .tinst{font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--text);}
+  .trade-row .tsetup{color:var(--text-dim); font-size:11px; margin-top:2px;}
+  .trade-row .tpnl{font-family:'JetBrains Mono',monospace; font-weight:600; text-align:right;}
+  .trade-row .tpnl.pos{color:var(--green);} .trade-row .tpnl.neg{color:var(--red);}
+  .trade-row .ttime{font-family:'JetBrains Mono',monospace; color:var(--text-dim); font-size:11px; text-align:right;}
+  .dd-empty{color:var(--text-dim); font-size:13px; padding:30px 0; text-align:center;}
+
+  footer{text-align:center; padding:36px 0 10px 0; color:var(--text-dim); font-size:12px; font-family:'JetBrains Mono',monospace;}
+
+  ::-webkit-scrollbar{width:8px; height:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15); border-radius:8px;}
+
+  @media(max-width:800px){
+    .cal-grid{gap:6px;} .dow-head{gap:6px;}
+    .day-cell{min-height:78px; padding:7px 8px;}
+    .day-pnl{font-size:13px;} .day-meta{display:none;}
+    .cal-toolbar{padding:12px;} .legend{display:none;}
+    .kpi-strip{gap:10px;}
+  }
+  @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important}.ambient-stage{transform:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="ambient-stage" id="ambientStage" aria-hidden="true">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="orb orb4"></div>
+</div>
+
+<header class="app-topbar">
+  <div class="wordmark">On<span>Point</span></div>
+  <nav class="nav-tabs" aria-label="Primary">
+    <button class="nav-btn">Dashboard</button>
+    <button class="nav-btn active">Calendar</button>
+    <button class="nav-btn">Trade data</button>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Trade Journal · Calendar</div>
+    <h1>Your trading calendar</h1>
+    <p class="hero-sub">Daily realized P&amp;L at a glance — click any day to see the trades behind the number.</p>
+
+    <div class="kpi-strip" id="kpiStrip"></div>
+  </div>
+
+  <div class="cal-toolbar glass">
+    <div class="month-nav">
+      <button class="month-btn" id="prevBtn">‹</button>
+      <div class="month-label" id="monthLabel">March 2026</div>
+      <button class="month-btn" id="nextBtn">›</button>
+      <button class="today-btn" id="todayBtn">Today</button>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot pos"></span>Winning day</div>
+      <div class="legend-item"><span class="legend-dot neg"></span>Losing day</div>
+      <div class="legend-item"><span class="legend-dot flat"></span>No trades</div>
+    </div>
+  </div>
+
+  <div class="cal-shell glass">
+    <div class="dow-head">
+      <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <div class="side-grid">
+    <div class="panel glass">
+      <div class="section-title">Month streaks &amp; averages</div>
+      <div id="streakList"></div>
+    </div>
+    <div class="day-detail glass">
+      <div class="dd-head">
+        <div class="dd-title" id="ddTitle">Select a day</div>
+        <div class="dd-pnl mono" id="ddPnl"></div>
+      </div>
+      <div id="ddBody"><div class="dd-empty">Click a day on the calendar to see its trades.</div></div>
+    </div>
+  </div>
+
+  <footer>OnPoint · calendar view · figures shown in your account currency</footer>
+</div>
+
+<script>
+// ---------- Sample trade data (same shape as OnPoint's journal) ----------
+const TRADES = [{"date":"2026-03-02","time":"09:15:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":125.0},{"date":"2026-03-02","time":"14:30:00","instrument":"WTI","setup":"Fakeout","pnl":-42.0},{"date":"2026-03-03","time":"10:05:00","instrument":"XAUUSD","setup":"Double Bottom/Top","pnl":-68.0},{"date":"2026-03-04","time":"16:45:00","instrument":"BTCUSD","setup":"Encounter","pnl":130.0},{"date":"2026-03-04","time":"20:10:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":54.0},{"date":"2026-03-05","time":"11:30:00","instrument":"XAGUSD","setup":"Trendline Support","pnl":-31.0},{"date":"2026-03-06","time":"17:00:00","instrument":"XAUUSD","setup":"Fakeout","pnl":91.0},{"date":"2026-03-06","time":"18:22:00","instrument":"WTI","setup":"Support/Resistance","pnl":-27.5},{"date":"2026-03-09","time":"09:45:00","instrument":"XAUUSD","setup":"Double Bottom/Top","pnl":-60.0},{"date":"2026-03-10","time":"12:15:00","instrument":"ETHUSD","setup":"Support/Resistance","pnl":146.0},{"date":"2026-03-11","time":"19:30:00","instrument":"XAUUSD","setup":"Encounter","pnl":-50.6},{"date":"2026-03-12","time":"08:20:00","instrument":"WTI","setup":"Fakeout","pnl":38.0},{"date":"2026-03-12","time":"15:40:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":30.2},{"date":"2026-03-13","time":"21:05:00","instrument":"BTCUSD","setup":"Double Bottom/Top","pnl":-93.0},{"date":"2026-03-16","time":"10:30:00","instrument":"XAUUSD","setup":"Trendline Support","pnl":125.0},{"date":"2026-03-17","time":"13:10:00","instrument":"XAGUSD","setup":"Support/Resistance","pnl":-24.0},{"date":"2026-03-18","time":"09:00:00","instrument":"XAUUSD","setup":"Fakeout","pnl":-72.0},{"date":"2026-03-19","time":"17:25:00","instrument":"WTI","setup":"Support/Resistance","pnl":47.1},{"date":"2026-03-19","time":"19:50:00","instrument":"XAUUSD","setup":"Double Bottom/Top","pnl":82.0},{"date":"2026-03-20","time":"11:00:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":-45.0},{"date":"2026-03-23","time":"16:10:00","instrument":"ETHUSD","setup":"Fakeout","pnl":-18.0},{"date":"2026-03-24","time":"08:45:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":20.0},{"date":"2026-03-25","time":"12:35:00","instrument":"WTI","setup":"Double Bottom/Top","pnl":51.2},{"date":"2026-03-26","time":"18:15:00","instrument":"XAUUSD","setup":"Trendline Support","pnl":-22.0},{"date":"2026-03-27","time":"09:55:00","instrument":"BTCUSD","setup":"Support/Resistance","pnl":61.0},{"date":"2026-03-27","time":"14:20:00","instrument":"XAUUSD","setup":"Fakeout","pnl":31.0},{"date":"2026-03-30","time":"19:00:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":-20.0},{"date":"2026-03-31","time":"10:30:00","instrument":"XAUUSD","setup":"Double Bottom/Top","pnl":-68.0},{"date":"2026-03-31","time":"16:45:00","instrument":"XAUUSD","setup":"Encounter","pnl":130.0},{"date":"2026-04-01","time":"11:30:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":125.0},{"date":"2026-04-02","time":"17:00:00","instrument":"XAGUSD","setup":"Double Bottom/Top","pnl":-55.0},{"date":"2026-04-06","time":"17:45:00","instrument":"XAGUSD","setup":"Fakeout","pnl":-60.0},{"date":"2026-04-06","time":"18:30:00","instrument":"XAUUSD","setup":"Double Bottom/Top","pnl":-60.0},{"date":"2026-04-07","time":"17:30:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":-50.63},{"date":"2026-04-09","time":"23:15:00","instrument":"XAUUSD","setup":"Double Bottom/Top","pnl":-43.86},{"date":"2026-04-10","time":"20:30:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":-52.43},{"date":"2026-04-14","time":"20:15:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":30.21},{"date":"2026-04-15","time":"21:00:00","instrument":"XAUUSD","setup":"Fakeout","pnl":-72.0},{"date":"2026-04-16","time":"19:45:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":-45.0},{"date":"2026-04-21","time":"21:15:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":125.0},{"date":"2026-04-22","time":"19:00:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":-46.17},{"date":"2026-04-27","time":"21:15:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":-48.0},{"date":"2026-04-28","time":"20:06:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":22.0},{"date":"2026-05-01","time":"17:10:00","instrument":"XAUUSD","setup":"Fakeout","pnl":91.0},{"date":"2026-05-04","time":"17:47:00","instrument":"XAUUSD","setup":"Double Bottom/Top","pnl":-61.83},{"date":"2026-05-05","time":"18:19:00","instrument":"WTI","setup":"Trendline Support","pnl":125.0},{"date":"2026-05-05","time":"22:39:00","instrument":"XAUUSD","setup":"Double Bottom/Top","pnl":-24.0},{"date":"2026-05-07","time":"12:06:00","instrument":"WTI","setup":"Trendline Support","pnl":125.0},{"date":"2026-05-08","time":"18:22:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":17.62},{"date":"2026-05-11","time":"12:00:00","instrument":"WTI","setup":"Support/Resistance","pnl":31.71},{"date":"2026-05-12","time":"11:46:00","instrument":"WTI","setup":"Support/Resistance","pnl":125.0},{"date":"2026-05-13","time":"11:30:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":-24.0},{"date":"2026-05-13","time":"19:18:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":-45.0},{"date":"2026-05-14","time":"20:32:00","instrument":"WTI","setup":"Fakeout","pnl":-51.33},{"date":"2026-05-18","time":"21:57:00","instrument":"WTI","setup":"Support/Resistance","pnl":-33.99},{"date":"2026-05-20","time":"19:12:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":-49.65},{"date":"2026-05-21","time":"08:11:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":0.92},{"date":"2026-05-22","time":"15:32:00","instrument":"XAUUSD","setup":"No Setup","pnl":-94.08},{"date":"2026-05-22","time":"16:49:00","instrument":"XAUUSD","setup":"Trendline Support","pnl":-26.76},{"date":"2026-05-25","time":"08:49:00","instrument":"XAUUSD","setup":"Encounter","pnl":-94.9},{"date":"2026-05-25","time":"20:41:00","instrument":"WTI","setup":"Support/Resistance","pnl":-43.62},{"date":"2026-05-26","time":"09:10:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":-36.14},{"date":"2026-05-27","time":"15:24:00","instrument":"WTI","setup":"Double Bottom/Top","pnl":-30.0},{"date":"2026-05-27","time":"16:00:00","instrument":"XAUUSD","setup":"Support/Resistance","pnl":0.04}];
+
+// ---------- Helpers ----------
+const fmtMoney = v => (v<0?'-$':'$') + Math.abs(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+let dayMap = {};
+TRADES.forEach(t=>{
+  if(!dayMap[t.date]) dayMap[t.date] = [];
+  dayMap[t.date].push(t);
+});
+
+// find latest month with data as the initial view
+const allDates = Object.keys(dayMap).sort();
+const latest = allDates.length ? new Date(allDates[allDates.length-1]+'T00:00:00') : new Date();
+let viewYear = latest.getFullYear();
+let viewMonth = latest.getMonth();
+let selectedDate = null;
+
+const todayStr = new Date().toISOString().slice(0,10);
+
+function dayStats(dateStr){
+  const trades = dayMap[dateStr] || [];
+  const pnl = trades.reduce((a,t)=>a+t.pnl,0);
+  const wins = trades.filter(t=>t.pnl>0).length;
+  return {trades, pnl, wins, count:trades.length};
+}
+
+function monthStats(year, month){
+  const trades = [];
+  Object.keys(dayMap).forEach(d=>{
+    const dt = new Date(d+'T00:00:00');
+    if(dt.getFullYear()===year && dt.getMonth()===month) trades.push(...dayMap[d]);
+  });
+  const pnl = trades.reduce((a,t)=>a+t.pnl,0);
+  const days = new Set(trades.map(t=>t.date));
+  let winDays=0, lossDays=0;
+  days.forEach(d=>{ const s=dayStats(d); if(s.pnl>0) winDays++; else if(s.pnl<0) lossDays++; });
+  const wins = trades.filter(t=>t.pnl>0).length;
+  const winRate = trades.length ? (wins/trades.length*100) : null;
+  const best = trades.length ? Math.max(...trades.map(t=>t.pnl)) : null;
+  const worst = trades.length ? Math.min(...trades.map(t=>t.pnl)) : null;
+  return {trades, pnl, winDays, lossDays, tradedDays:days.size, winRate, best, worst};
+}
+
+function renderKPI(){
+  const s = monthStats(viewYear, viewMonth);
+  const avgPerDay = s.tradedDays ? s.pnl/s.tradedDays : null;
+  const items = [
+    {label:'Net P&L this month', val: fmtMoney(s.pnl), cls: s.pnl>=0?'pos':'neg'},
+    {label:'Winning days', val: s.tradedDays ? `${s.winDays}/${s.tradedDays}` : '—', cls:''},
+    {label:'Trades logged', val: s.trades.length, cls:''},
+    {label:'Win rate', val: s.winRate===null?'—':s.winRate.toFixed(1)+'%', cls:''},
+    {label:'Avg P&L / trading day', val: avgPerDay===null?'—':fmtMoney(avgPerDay), cls: avgPerDay>=0?'pos':'neg'},
+  ];
+  document.getElementById('kpiStrip').innerHTML = items.map(i=>`
+    <div class="kpi glass">
+      <div class="label">${i.label}</div>
+      <div class="val mono ${i.cls}">${i.val}</div>
+    </div>
+  `).join('');
+}
+
+function renderStreaks(){
+  const s = monthStats(viewYear, viewMonth);
+  const rows = [
+    {label:'Best trade', val: s.best===null?'—':fmtMoney(s.best), cls:'pos'},
+    {label:'Worst trade', val: s.worst===null?'—':fmtMoney(s.worst), cls:'neg'},
+    {label:'Losing days', val: s.tradedDays ? s.lossDays : '—', cls:''},
+    {label:'Days traded', val: s.tradedDays || '—', cls:''},
+  ];
+  document.getElementById('streakList').innerHTML = rows.map(r=>`
+    <div class="streak-row">
+      <span class="slabel">${r.label}</span>
+      <span class="sval mono ${r.cls}">${r.val}</span>
+    </div>
+  `).join('');
+}
+
+function renderCalendar(){
+  document.getElementById('monthLabel').textContent = `${MONTH_NAMES[viewMonth]} ${viewYear}`;
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML='';
+
+  const firstOfMonth = new Date(viewYear, viewMonth, 1);
+  // Monday-first index: JS getDay() 0=Sun..6=Sat -> convert to 0=Mon..6=Sun
+  const startOffset = (firstOfMonth.getDay() + 6) % 7;
+  const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+  const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+
+  const cells = [];
+  for(let i=0;i<startOffset;i++){
+    const d = daysInPrevMonth - startOffset + i + 1;
+    cells.push({day:d, outside:true});
+  }
+  for(let d=1; d<=daysInMonth; d++){
+    cells.push({day:d, outside:false});
+  }
+  while(cells.length % 7 !== 0){
+    cells.push({day: cells.length - (startOffset+daysInMonth) + 1, outside:true});
+  }
+
+  let weekTrades = [];
+  let weekIndex = 0;
+
+  cells.forEach((c, idx)=>{
+    if(c.outside){
+      const el = document.createElement('div');
+      el.className='day-cell outside';
+      el.innerHTML = `<div class="day-num">${c.day}</div>`;
+      grid.appendChild(el);
+    } else {
+      const dateStr = `${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${String(c.day).padStart(2,'0')}`;
+      const s = dayStats(dateStr);
+      const isToday = dateStr === todayStr;
+      let cls = 'day-cell';
+      if(s.count>0) cls += s.pnl>=0 ? ' win' : ' loss';
+      if(isToday) cls += ' today';
+      if(dateStr === selectedDate) cls += ' today';
+      const el = document.createElement('div');
+      el.className = cls;
+      el.dataset.date = dateStr;
+      el.innerHTML = `
+        <div class="day-num"><span>${c.day}</span><span class="dot"></span></div>
+        ${s.count>0 ? `<div class="day-pnl ${s.pnl>=0?'pos':'neg'} mono">${fmtMoney(s.pnl)}</div>` : ''}
+        ${s.count>0 ? `<div class="day-meta">${s.count} trade${s.count>1?'s':''} · ${s.wins}W</div>` : ''}
+      `;
+      el.addEventListener('click', ()=>selectDay(dateStr));
+      grid.appendChild(el);
+    }
+
+    // end of week -> insert week summary tag
+    if((idx+1) % 7 === 0){
+      const weekCells = cells.slice(idx-6, idx+1);
+      let wkPnl = 0, wkCount = 0;
+      weekCells.forEach(c2=>{
+        if(!c2.outside){
+          const ds = `${viewYear}-${String(viewMonth+1).padStart(2,'0')}-${String(c2.day).padStart(2,'0')}`;
+          const s2 = dayStats(ds);
+          wkPnl += s2.pnl; wkCount += s2.count;
+        }
+      });
+      weekIndex++;
+      const tag = document.createElement('div');
+      tag.className='week-tag';
+      tag.innerHTML = `
+        <span class="wk-label">Week ${weekIndex}</span>
+        <span class="wk-line"></span>
+        <span class="wk-val mono ${wkPnl>=0?'pos':'neg'}">${wkCount>0?fmtMoney(wkPnl):'—'}</span>
+      `;
+      grid.appendChild(tag);
+    }
+  });
+}
+
+function selectDay(dateStr){
+  selectedDate = dateStr;
+  renderCalendar();
+  const s = dayStats(dateStr);
+  const d = new Date(dateStr+'T00:00:00');
+  const label = d.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric', year:'numeric'});
+  document.getElementById('ddTitle').textContent = label;
+  const pnlEl = document.getElementById('ddPnl');
+  pnlEl.textContent = s.count ? fmtMoney(s.pnl) : '';
+  pnlEl.className = 'dd-pnl mono ' + (s.pnl>=0?'pos':'neg');
+
+  const body = document.getElementById('ddBody');
+  if(!s.count){
+    body.innerHTML = `<div class="dd-empty">No trades logged on this day.</div>`;
+    return;
+  }
+  body.innerHTML = s.trades.map(t=>`
+    <div class="trade-row">
+      <div>
+        <div class="tinst">${t.instrument}</div>
+        <div class="tsetup">${t.setup}</div>
+      </div>
+      <div class="ttime">${t.time.slice(0,5)}</div>
+      <div class="tpnl ${t.pnl>=0?'pos':'neg'}">${fmtMoney(t.pnl)}</div>
+    </div>
+  `).join('');
+}
+
+function goToMonth(offset){
+  viewMonth += offset;
+  if(viewMonth<0){viewMonth=11; viewYear--;}
+  if(viewMonth>11){viewMonth=0; viewYear++;}
+  renderKPI();
+  renderStreaks();
+  renderCalendar();
+}
+
+document.getElementById('prevBtn').addEventListener('click', ()=>goToMonth(-1));
+document.getElementById('nextBtn').addEventListener('click', ()=>goToMonth(1));
+document.getElementById('todayBtn').addEventListener('click', ()=>{
+  const t = new Date();
+  viewYear = t.getFullYear(); viewMonth = t.getMonth();
+  renderKPI(); renderStreaks(); renderCalendar();
+});
+
+renderKPI();
+renderStreaks();
+renderCalendar();
+
+// ambient parallax, matching dashboard behavior
+const ambientStage=document.getElementById('ambientStage');let ambientFrame=null;
+if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&window.matchMedia('(pointer:fine)').matches){
+  window.addEventListener('pointermove',event=>{if(ambientFrame)return;ambientFrame=requestAnimationFrame(()=>{const x=event.clientX/window.innerWidth,y=event.clientY/window.innerHeight;ambientStage.style.setProperty('--tilt-x',`${(x-.5)*3.2}deg`);ambientStage.style.setProperty('--tilt-y',`${(.5-y)*2.4}deg`);ambientFrame=null;});},{passive:true});
+  document.documentElement.addEventListener('mouseleave',()=>{ambientStage.style.setProperty('--tilt-x','0deg');ambientStage.style.setProperty('--tilt-y','0deg');});
+}
+</script>
+</body>
+</html>

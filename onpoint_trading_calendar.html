@@ -32,7 +32,7 @@
   html{background:var(--bg);}
   body{
     min-height:100vh; background:
-      radial-gradient(ellipse 95% 65% at 50% -14%,rgba(222,168,66,.34),transparent 70%),
+      radial-gradient(ellipse 95% 65% at 50% -14%,rgba(76,120,210,.3),transparent 70%),
       radial-gradient(ellipse 70% 60% at 108% 20%,rgba(56,217,155,.28),transparent 66%),
       radial-gradient(ellipse 75% 60% at -10% 80%,rgba(164,134,228,.28),transparent 66%),
       radial-gradient(ellipse 60% 50% at 92% 98%,rgba(226,70,52,.2),transparent 64%),
@@ -46,7 +46,7 @@
   .orb{position:absolute;border-radius:46% 54% 63% 37% / 42% 39% 61% 58%;filter:blur(44px);opacity:.44;transform-style:preserve-3d;will-change:transform;}
   .orb::before{content:'';position:absolute;inset:13%;border-radius:inherit;background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.62),rgba(255,255,255,.06) 24%,transparent 62%);filter:blur(8px);opacity:.7}
   .orb::after{content:'';position:absolute;inset:-8%;border-radius:inherit;border:1px solid rgba(255,255,255,.1);box-shadow:inset 0 0 70px rgba(255,255,255,.08),0 0 90px currentColor;opacity:.28}
-  .orb1{width:620px;height:620px;top:-280px;left:-210px;color:#c3943f;background:radial-gradient(circle at 36% 34%,#d4ac63 0%,#75511f 33%,rgba(104,70,20,.12) 68%,transparent 74%);animation:orbOne 20s ease-in-out infinite alternate}
+  .orb1{width:620px;height:620px;top:-280px;left:-210px;color:#557fcb;background:radial-gradient(circle at 36% 34%,#7299e5 0%,#294976 33%,rgba(35,67,114,.12) 68%,transparent 74%);animation:orbOne 20s ease-in-out infinite alternate}
   .orb2{width:560px;height:560px;top:7%;right:-260px;color:#2f9371;background:radial-gradient(circle at 58% 36%,#52bd91 0%,#15543f 34%,rgba(20,82,63,.13) 68%,transparent 74%);animation:orbTwo 24s ease-in-out infinite alternate}
   .orb3{width:540px;height:540px;bottom:-290px;left:18%;color:#a94f45;background:radial-gradient(circle at 50% 44%,#c96859 0%,#622923 36%,rgba(101,40,31,.12) 70%,transparent 76%);animation:orbThree 22s ease-in-out infinite alternate}
   .orb4{width:500px;height:500px;bottom:2%;right:2%;color:#665aa0;background:radial-gradient(circle at 48% 44%,#8375bf 0%,#392f62 36%,rgba(57,47,98,.12) 70%,transparent 76%);animation:orbFour 26s ease-in-out infinite alternate}
@@ -144,8 +144,8 @@
   .day-cell:hover{transform:translateY(-2px); border-color:rgba(255,255,255,.24); box-shadow:0 18px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.1);}
   .day-cell.outside{opacity:.32; cursor:default;}
   .day-cell.outside:hover{transform:none; box-shadow:inset 0 1px 0 rgba(255,255,255,.08);}
-  .day-cell.win{background:linear-gradient(150deg, rgba(56,217,155,.16), rgba(255,255,255,.02)); border-color:rgba(56,217,155,.32);}
-  .day-cell.loss{background:linear-gradient(150deg, rgba(226,70,52,.16), rgba(255,255,255,.02)); border-color:rgba(226,70,52,.32);}
+  .day-cell.win{background:transparent; border:2px solid rgba(56,217,155,.75);}
+  .day-cell.loss{background:transparent; border:2px solid rgba(226,70,52,.75);}
   .day-cell.today{border-color:var(--gold); box-shadow:0 0 0 1px rgba(222,168,66,.5), inset 0 1px 0 rgba(255,255,255,.1);}
   .day-num{font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--text-mid); display:flex; align-items:center; justify-content:space-between;}
   .day-num .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);display:none;}
@@ -299,6 +299,7 @@ function dayStats(dateStr){
   const wins = trades.filter(t=>t.pnl>0).length;
   return {trades, pnl, wins, count:trades.length};
 }
+function pnlBorderColor(pnl){const alpha=Math.min(.95,.3+Math.abs(pnl)/300).toFixed(2);return `rgba(${pnl>=0?'56,217,155':'226,70,52'},${alpha})`;}
 
 function monthStats(year, month){
   const trades = [];
@@ -393,6 +394,7 @@ function renderCalendar(){
       if(dateStr === selectedDate) cls += ' today';
       const el = document.createElement('div');
       el.className = cls;
+      if(s.count>0) el.style.borderColor = pnlBorderColor(s.pnl);
       el.dataset.date = dateStr;
       el.innerHTML = `
         <div class="day-num"><span>${c.day}</span><span class="dot"></span></div>

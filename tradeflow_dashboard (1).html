@@ -435,7 +435,7 @@
         <div class="radar-footer"><div class="radar-rank best"><span class="radar-rank-label">Best</span><span class="radar-rank-value" id="sessionBest">—</span><span class="radar-rank-meta" id="sessionBestMeta">No realized trades</span></div><div class="radar-rank worst"><span class="radar-rank-label">Worst</span><span class="radar-rank-value" id="sessionWorst">—</span><span class="radar-rank-meta" id="sessionWorstMeta">No realized trades</span></div></div>
       </article>
       <article class="radar-card pairs glass">
-        <div class="radar-top"><div class="radar-kicker">Instruments</div><div class="metric-pill">TOP 7</div></div>
+        <div class="radar-top"><div class="radar-kicker">Instruments</div><div class="metric-pill" id="pairsPointCount">AUTO</div></div>
         <div class="radar-headline"><strong id="pairsHeadline">—</strong><span id="pairsHeadlineCopy">instrument leader</span></div>
         <div class="radar-canvas-wrap"><canvas id="pairsRadar"></canvas></div>
         <div class="radar-footer"><div class="radar-rank best"><span class="radar-rank-label">Best</span><span class="radar-rank-value" id="pairsBest">—</span><span class="radar-rank-meta" id="pairsBestMeta">No realized trades</span></div><div class="radar-rank worst"><span class="radar-rank-label">Worst</span><span class="radar-rank-value" id="pairsWorst">—</span><span class="radar-rank-meta" id="pairsWorstMeta">No realized trades</span></div></div>
@@ -929,11 +929,11 @@ function renderRadar(canvasId,entries,color,fill,labelFormatter=readableDimensio
   if(radarChartInsts[canvasId])radarChartInsts[canvasId].destroy();
   if(!entries.length){clearRadar(canvasId,'No realized trades in this view');return;}
   if(typeof Chart==='undefined'){clearRadar(canvasId,'Chart engine unavailable');return;}
-  const canvas=document.getElementById(canvasId),maxCount=Math.max(1,...entries.map(entry=>entry.count||0)),scores=scoreMode==='count'?entries.map(entry=>(entry.count||0)/maxCount*100):relativeRadarValues(entries);
+  const canvas=document.getElementById(canvasId),maxCount=Math.max(1,...entries.map(entry=>entry.count||0)),scores=scoreMode==='count'?entries.map(entry=>(entry.count||0)/maxCount*100):relativeRadarValues(entries),labelSize=entries.length>12?9:entries.length>8?11:14,labelPadding=entries.length>10?6:11;
   radarChartInsts[canvasId]=new Chart(canvas.getContext('2d'),{
     type:'radar',
     data:{labels:entries.map(entry=>labelFormatter(entry.name)),datasets:[{data:scores,actual:entries.map(entry=>entry.pnl),counts:entries.map(entry=>entry.count),borderColor:color,backgroundColor:fill,borderWidth:2,pointRadius:3,pointHoverRadius:5,pointBackgroundColor:color,pointBorderColor:'rgba(255,255,255,.62)',pointBorderWidth:1}]},
-    options:{responsive:true,maintainAspectRatio:false,animation:{duration:520,easing:'easeOutQuart'},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(10,11,11,.92)',borderColor:'rgba(255,255,255,.14)',borderWidth:1,titleColor:'#F3F4F7',bodyColor:'#C9CED7',padding:10,cornerRadius:10,callbacks:{label:context=>`${fmtMoney(context.dataset.actual[context.dataIndex])} net P&L · ${context.dataset.counts[context.dataIndex]} trade${context.dataset.counts[context.dataIndex]===1?'':'s'}`}}},scales:{r:{min:0,max:100,beginAtZero:true,ticks:{display:false,stepSize:20},grid:{color:'rgba(255,255,255,.09)'},angleLines:{color:'rgba(255,255,255,.09)'},pointLabels:{color:'#E0E3E9',padding:11,font:{family:'Inter',size:14,weight:'600'}}}}}
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:520,easing:'easeOutQuart'},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(10,11,11,.92)',borderColor:'rgba(255,255,255,.14)',borderWidth:1,titleColor:'#F3F4F7',bodyColor:'#C9CED7',padding:10,cornerRadius:10,callbacks:{label:context=>`${fmtMoney(context.dataset.actual[context.dataIndex])} net P&L · ${context.dataset.counts[context.dataIndex]} trade${context.dataset.counts[context.dataIndex]===1?'':'s'}`}}},scales:{r:{min:0,max:100,beginAtZero:true,ticks:{display:false,stepSize:20},grid:{color:'rgba(255,255,255,.09)'},angleLines:{color:'rgba(255,255,255,.09)'},pointLabels:{color:'#E0E3E9',padding:labelPadding,font:{family:'Inter',size:labelSize,weight:'600'}}}}}
   });
 }
 function setPerformanceRank(prefix,entries,labelFormatter=readableDimension){
@@ -956,7 +956,8 @@ function renderPerformanceMap(filteredTrades){
   document.getElementById('sessionHeadlineCopy').textContent=bestSession?`${readableDimension(bestSession.name)} of positive session P&L`:'positive session share';
   renderRadar('sessionRadar',session,'#E6AF54','rgba(230,175,84,.23)');setPerformanceRank('session',session);
 
-  const instruments=performanceEntries(filteredTrades,'instrument').sort((a,b)=>b.count-a.count||Math.abs(b.pnl)-Math.abs(a.pnl)).slice(0,7),bestInstrument=[...instruments].sort((a,b)=>b.pnl-a.pnl)[0],positiveInstrument=instruments.reduce((sum,item)=>sum+Math.max(0,item.pnl),0),instrumentShare=bestInstrument&&bestInstrument.pnl>0&&positiveInstrument?Math.round(bestInstrument.pnl/positiveInstrument*100):0;
+  const instruments=performanceEntries(filteredTrades,'instrument').sort((a,b)=>b.count-a.count||Math.abs(b.pnl)-Math.abs(a.pnl)),bestInstrument=[...instruments].sort((a,b)=>b.pnl-a.pnl)[0],positiveInstrument=instruments.reduce((sum,item)=>sum+Math.max(0,item.pnl),0),instrumentShare=bestInstrument&&bestInstrument.pnl>0&&positiveInstrument?Math.round(bestInstrument.pnl/positiveInstrument*100):0;
+  document.getElementById('pairsPointCount').textContent=`${instruments.length} POINT${instruments.length===1?'':'S'}`;
   document.getElementById('pairsHeadline').textContent=bestInstrument?blockDimension(bestInstrument.name):'—';
   document.getElementById('pairsHeadlineCopy').textContent=bestInstrument?`leads with ${instrumentShare}% of positive P&L`:'instrument leader';
   renderRadar('pairsRadar',instruments,'#CCBAF2','rgba(204,186,242,.23)',blockDimension);setPerformanceRank('pairs',instruments,blockDimension);
@@ -1065,19 +1066,19 @@ function renderEquity(filteredTrades){
 function renderReason(filteredTrades){
   const isNothingReason=value=>['nothing','notinhg','nothng','nothin'].includes(canonicalHeader(value));
   const groups = groupBy(filteredTrades.filter(t=>Number.isFinite(t.pnl)&&!isNothingReason(t.reason)), 'reason');
-  let entries = Object.entries(groups).map(([name, trades])=>({name, pnl: trades.reduce((a,t)=>a+t.pnl,0), n:trades.length}));
-  entries.sort((a,b)=>Math.abs(b.pnl)-Math.abs(a.pnl));
-  entries=entries.slice(0,7);
+  const radarEntries=Object.entries(groups).map(([name,trades])=>({name,pnl:trades.reduce((a,t)=>a+t.pnl,0),n:trades.length})).sort((a,b)=>Math.abs(b.pnl)-Math.abs(a.pnl));
+  const entries=radarEntries.slice(0,7);
   const radarHeadline=document.getElementById('mindsetRadarHeadline'),radarCopy=document.getElementById('mindsetRadarCopy'),bubbleHeadline=document.getElementById('mindsetBubbleHeadline'),bubbleCopy=document.getElementById('mindsetBubbleCopy');
   const ctx = document.getElementById('reasonChart').getContext('2d');
   if(reasonBubbleFrame){cancelAnimationFrame(reasonBubbleFrame);reasonBubbleFrame=null;}
   if(reasonChartInst) reasonChartInst.destroy();
-  if(!entries.length){radarHeadline.textContent=bubbleHeadline.textContent='—';radarCopy.textContent='no mindset losses in this view';bubbleCopy.textContent='no mindset factors in this view';clearRadar('reasonRadarChart','No mindset reasons in this view');const canvas=document.getElementById('reasonChart'),draw=nativeCanvas(canvas,240),c=draw.ctx;c.clearRect(0,0,draw.width,draw.height);c.fillStyle='#89919E';c.font='11px JetBrains Mono';c.textAlign='center';c.fillText('No mindset reasons in this view',draw.width/2,draw.height/2);return;}
-  const lossLeader=[...entries].filter(entry=>entry.pnl<0).sort((a,b)=>a.pnl-b.pnl)[0]||entries[0];
+  if(!radarEntries.length){radarHeadline.textContent=bubbleHeadline.textContent='—';radarCopy.textContent='no mindset losses in this view';bubbleCopy.textContent='no mindset factors in this view';clearRadar('reasonRadarChart','No mindset reasons in this view');const canvas=document.getElementById('reasonChart'),draw=nativeCanvas(canvas,240),c=draw.ctx;c.clearRect(0,0,draw.width,draw.height);c.fillStyle='#89919E';c.font='11px JetBrains Mono';c.textAlign='center';c.fillText('No mindset reasons in this view',draw.width/2,draw.height/2);return;}
+  const lossLeader=[...radarEntries].filter(entry=>entry.pnl<0).sort((a,b)=>a.pnl-b.pnl)[0]||radarEntries[0];
   const reasonTradeTotal=Math.max(1,entries.reduce((sum,entry)=>sum+entry.n,0)),reasonShares=new Map(entries.map(entry=>[entry.name,Math.round(entry.n/reasonTradeTotal*100)]));
   radarHeadline.textContent=blockDimension(lossLeader.name);radarCopy.textContent=lossLeader.pnl<0?`carries ${fmtMoney(lossLeader.pnl)} across ${lossLeader.n} trades`:`leads with ${fmtMoney(lossLeader.pnl)} net P&L`;
   bubbleHeadline.textContent=entries.length;bubbleCopy.textContent=`mindset factor${entries.length===1?'':'s'} ranked by absolute P&L impact`;
-  renderRadar('reasonRadarChart',entries.map(entry=>({name:entry.name,pnl:entry.pnl,count:entry.n})),'#E6AF54','rgba(230,175,84,.22)',name=>[readableDimension(name),`${reasonShares.get(name)||0}%`],'count');
+  const radarTradeTotal=Math.max(1,radarEntries.reduce((sum,entry)=>sum+entry.n,0)),radarShares=new Map(radarEntries.map(entry=>[entry.name,Math.round(entry.n/radarTradeTotal*100)]));
+  renderRadar('reasonRadarChart',radarEntries.map(entry=>({name:entry.name,pnl:entry.pnl,count:entry.n})),'#E6AF54','rgba(230,175,84,.22)',name=>[readableDimension(name),`${radarShares.get(name)||0}%`],'count');
   const maxImpact=Math.max(1,...entries.map(e=>Math.abs(e.pnl))),maxLoss=Math.max(1,...entries.filter(e=>e.pnl<0).map(e=>Math.abs(e.pnl)));
   const packedPositions=[{x:48,y:52},{x:2,y:96},{x:96,y:4},{x:39,y:0},{x:58,y:100},{x:0,y:16},{x:100,y:82}];
   if(typeof Chart==='undefined'){

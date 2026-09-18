@@ -1063,11 +1063,22 @@ function renderEquity(filteredTrades){
   });
 }
 
+function mindsetCategory(reason){
+  const value=canonicalHeader(reason);
+  if(/plan|system|setup|gambl|rule|discipline|overtrad|revenge/.test(value))return'Discipline';
+  if(/entry|exit|closing|close|trail|target|tp|fomo|chase|confirmation/.test(value))return'Execution';
+  if(/stop|sl|risk|lot|size|leverage/.test(value))return'Risk Management';
+  if(/trend|sideway|range|news|manipulation|fakeout|market/.test(value))return'Market Context';
+  if(/fear|confidence|patien|emotion|greed|hesitat|careless/.test(value))return'Psychology';
+  return'Other Issues';
+}
 function renderReason(filteredTrades){
   const isNothingReason=value=>['nothing','notinhg','nothng','nothin'].includes(canonicalHeader(value));
-  const groups = groupBy(filteredTrades.filter(t=>Number.isFinite(t.pnl)&&!isNothingReason(t.reason)), 'reason');
-  const radarEntries=Object.entries(groups).map(([name,trades])=>({name,pnl:trades.reduce((a,t)=>a+t.pnl,0),n:trades.length})).sort((a,b)=>Math.abs(b.pnl)-Math.abs(a.pnl));
-  const entries=radarEntries.slice(0,7);
+  const problemTrades=filteredTrades.filter(t=>Number.isFinite(t.pnl)&&!isNothingReason(t.reason));
+  const groups = groupBy(problemTrades, 'reason');
+  const categorized=problemTrades.map(trade=>({...trade,mindsetCategory:mindsetCategory(trade.reason)}));
+  const radarEntries=performanceEntries(categorized,'mindsetCategory').map(entry=>({name:entry.name,pnl:entry.pnl,n:entry.count})).sort((a,b)=>Math.abs(b.pnl)-Math.abs(a.pnl));
+  const entries=Object.entries(groups).map(([name,trades])=>({name,pnl:trades.reduce((sum,trade)=>sum+trade.pnl,0),n:trades.length})).sort((a,b)=>Math.abs(b.pnl)-Math.abs(a.pnl)).slice(0,7);
   const radarHeadline=document.getElementById('mindsetRadarHeadline'),radarCopy=document.getElementById('mindsetRadarCopy'),bubbleHeadline=document.getElementById('mindsetBubbleHeadline'),bubbleCopy=document.getElementById('mindsetBubbleCopy');
   const ctx = document.getElementById('reasonChart').getContext('2d');
   if(reasonBubbleFrame){cancelAnimationFrame(reasonBubbleFrame);reasonBubbleFrame=null;}

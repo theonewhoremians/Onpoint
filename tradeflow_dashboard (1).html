@@ -598,13 +598,16 @@ function durationMinutes(value){
   return numeric(raw);
 }
 function parseFormattedDate(value){
-  const raw=String(value??'').trim(),match=raw.match(/^(\d{1,4})\s*([/.-])\s*(\d{1,2})\2\s*(\d{1,4})(?=$|[T\s])/);if(!match)return null;
-  const [,first,,middle,last]=match;let year,month,day;
+  const raw=String(value??'').trim(),match=raw.match(/^(\d{1,4})\s*[/.-]+\s*(\d{1,2})\s*[/.-]+\s*(\d{1,4})(?=$|[T\s])/);if(!match)return null;
+  const [,first,middle,last]=match;let year,month,day;
   if(first.length===4){year=Number(first);month=Number(middle);day=Number(last);}
+  else if(JOURNAL_DATE_FORMAT==='YMD'||![2,4].includes(last.length))return null;
+  else if(Number(first)>12&&Number(middle)<=12){day=Number(first);month=Number(middle);year=Number(last);}
+  else if(Number(middle)>12&&Number(first)<=12){month=Number(first);day=Number(middle);year=Number(last);}
   else if(JOURNAL_DATE_FORMAT==='DMY'){day=Number(first);month=Number(middle);year=Number(last);}
   else if(JOURNAL_DATE_FORMAT==='MDY'){month=Number(first);day=Number(middle);year=Number(last);}
   else return null;
-  if(String(last).length===2&&first.length!==4)year+=year>=70?1900:2000;
+  if(last.length===2&&first.length!==4)year+=year>=70?1900:2000;
   const check=new Date(Date.UTC(year,month-1,day));if(check.getUTCFullYear()!==year||check.getUTCMonth()!==month-1||check.getUTCDate()!==day)return null;
   return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
 }
@@ -762,7 +765,7 @@ function parseDelimited(text){
 function parseCsv(text,source){const rows=matrixToRows(parseDelimited(String(text).replace(/^\uFEFF/,'')));if(!rows.length)throw new Error('No table was found in this file.');refreshWithRows(rows,source);}
 function loadWorkbook(buffer,source){
   if(typeof XLSX==='undefined')throw new Error('Excel support could not start. Check your internet connection or save the sheet as CSV.');const workbook=XLSX.read(buffer,{type:'array',cellDates:true});let selected=null;
-  workbook.SheetNames.forEach(name=>{const matrix=XLSX.utils.sheet_to_json(workbook.Sheets[name],{header:1,defval:null,raw:false,blankrows:false});const score=matrixScore(matrix).score+Math.min(matrix.length,100)/10;if(!selected||score>selected.score)selected={name,matrix,score};});
+  workbook.SheetNames.forEach(name=>{const matrix=XLSX.utils.sheet_to_json(workbook.Sheets[name],{header:1,defval:null,raw:true,blankrows:false});const score=matrixScore(matrix).score+Math.min(matrix.length,100)/10;if(!selected||score>selected.score)selected={name,matrix,score};});
   const rows=matrixToRows(selected?.matrix||[]);if(!rows.length)throw new Error('No trade table was found in this workbook.');refreshWithRows(rows,`${source} · ${selected.name}`);
 }
 function googleCsvUrl(url){const raw=String(url).trim();if(/[?&]output=csv/i.test(raw))return raw;const published=raw.match(/\/spreadsheets\/d\/e\/([a-zA-Z0-9-_]+)/)?.[1];if(published)return `https://docs.google.com/spreadsheets/d/e/${published}/pub?output=csv`;const id=raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)?.[1];if(!id)throw new Error('That does not look like a Google Sheets sharing link.');const gid=raw.match(/[?#&]gid=(\d+)/)?.[1]||'0';return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${gid}`;}

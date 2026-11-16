@@ -213,10 +213,10 @@
   .landing-shell .upload-zone{min-height:246px;border:1px solid rgba(255,255,255,.16);border-radius:20px;background:radial-gradient(circle at 50% 20%,rgba(255,255,255,.065),transparent 46%),linear-gradient(160deg,rgba(255,255,255,.045),rgba(0,0,0,.16));box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -24px 50px rgba(0,0,0,.14)}.landing-shell .upload-zone:hover,.landing-shell .upload-zone.dragging{border-color:rgba(222,168,66,.58);background:radial-gradient(circle at 50% 22%,rgba(222,168,66,.085),transparent 46%),linear-gradient(160deg,rgba(255,255,255,.05),rgba(0,0,0,.14));box-shadow:inset 0 1px 0 rgba(255,255,255,.15),inset 0 -20px 46px rgba(0,0,0,.12),0 0 0 1px rgba(222,168,66,.055)}
   .upload-icon{width:58px;height:58px;background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.025));border-color:rgba(255,255,255,.16);box-shadow:0 14px 34px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.18);transition:transform .22s ease,border-color .22s ease,color .22s ease}.upload-zone:hover .upload-icon,.upload-zone.dragging .upload-icon{transform:translateY(-3px) scale(1.035);border-color:rgba(222,168,66,.42);color:var(--gold-bright)}
   .sheet-card{margin-top:16px;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:17px;background:linear-gradient(140deg,rgba(255,255,255,.05),rgba(255,255,255,.018));box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}.sheet-label{font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text-mid)}
-  .timezone-card{margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid rgba(255,255,255,.09);border-radius:15px;padding:12px 14px;background:rgba(255,255,255,.028)}.timezone-copy{display:flex;flex-direction:column;gap:3px}.timezone-copy strong{font-size:11px;color:#D8DCE3}.timezone-copy small{font-size:9px;color:#858E9C}.timezone-card select{min-width:205px;border:1px solid rgba(255,255,255,.14);border-radius:11px;padding:8px 32px 8px 10px;background:#151615;color:#E3E5E9;font:10px 'JetBrains Mono',monospace;outline:none;cursor:pointer}.timezone-card select:focus{border-color:rgba(222,168,66,.55);box-shadow:0 0 0 3px rgba(222,168,66,.11)}
+  .import-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}.timezone-card{min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:10px;border:1px solid rgba(255,255,255,.09);border-radius:15px;padding:14px;background:rgba(255,255,255,.028)}.timezone-copy{display:flex;flex-direction:column;gap:3px}.timezone-copy strong{font-size:11px;color:#D8DCE3}.timezone-copy small{font-size:9px;color:#858E9C;line-height:1.45}.timezone-card select{width:100%;min-width:0;border:1px solid rgba(255,255,255,.14);border-radius:11px;padding:9px 32px 9px 10px;background:#151615;color:#E3E5E9;font:10px 'JetBrains Mono',monospace;outline:none;cursor:pointer}.timezone-card select:focus{border-color:rgba(222,168,66,.55);box-shadow:0 0 0 3px rgba(222,168,66,.11)}
   .divider{display:flex;align-items:center;gap:12px;color:#5f6267;font:10px 'JetBrains Mono',monospace;margin:14px 0}.divider:before,.divider:after{content:'';height:1px;background:rgba(255,255,255,.11);flex:1}
   .landing-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:13px}.landing-actions .import-status{flex:1}.text-btn{border:0;background:none;color:var(--text-dim);font:11px 'Inter',sans-serif;cursor:pointer;padding:5px}.text-btn:hover{color:var(--gold)}
-  @media(max-width:560px){.timezone-card{align-items:stretch;flex-direction:column}.timezone-card select{width:100%;min-width:0}}
+  @media(max-width:560px){.import-settings{grid-template-columns:1fr}}
   .app-topbar{max-width:1280px;margin:16px auto 0;padding:8px 28px;display:flex;align-items:center;justify-content:space-between;gap:18px;border:0;background:transparent;box-shadow:none}.wordmark{font:700 27px 'Bricolage Grotesque',sans-serif;letter-spacing:-.06em;line-height:.95;background:linear-gradient(110deg,#fff 20%,#d7d9d9 55%,#b9c3d5 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 12px 38px rgba(0,0,0,.42)}.nav-tabs{display:flex;gap:5px;border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:4px;background:rgba(10,11,11,.54);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 26px rgba(0,0,0,.22)}.nav-btn{border:0;background:transparent;color:var(--text-dim);border-radius:8px;padding:8px 12px;font:11px 'Inter',sans-serif;cursor:pointer}.nav-btn.active,.nav-btn:hover{background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.055));box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 5px 16px rgba(0,0,0,.18);color:var(--text)}
   .dashboard-title{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:4px}.dashboard-title .hero-sub{margin-top:8px}.new-data-btn{white-space:nowrap}
   .page.active .glass{animation:rise .34s cubic-bezier(.2,.8,.2,1) both}.page.active .kpi:nth-child(n+2){animation-delay:.03s}
@@ -318,17 +318,27 @@
             <button class="primary-btn" id="loadSheetBtn">Load</button>
           </div>
         </div>
-        <div class="timezone-card">
-          <label class="timezone-copy" for="dataTimezone"><strong>Data timezone</strong><small>Timezone used by the opening timestamps</small></label>
-          <select id="dataTimezone" aria-label="Trade data timezone">
-            <option value="Asia/Kolkata">Asia/Kolkata · UTC+05:30</option>
-            <option value="UTC">UTC · UTC+00:00</option>
-            <option value="America/New_York">New York · UTC−05:00/−04:00</option>
-            <option value="Europe/London">London · UTC+00:00/+01:00</option>
-            <option value="Asia/Tokyo">Tokyo · UTC+09:00</option>
-            <option value="Asia/Dubai">Dubai · UTC+04:00</option>
-            <option value="Australia/Sydney">Sydney · UTC+10:00/+11:00</option>
-          </select>
+        <div class="import-settings">
+          <div class="timezone-card">
+            <label class="timezone-copy" for="dateFormat"><strong>Date format</strong><small>Used to interpret all imported dates</small></label>
+            <select id="dateFormat" aria-label="Trade data date format">
+              <option value="DMY">DD/MM/YYYY · day first</option>
+              <option value="MDY">MM/DD/YYYY · month first</option>
+              <option value="YMD">YYYY-MM-DD · year first</option>
+            </select>
+          </div>
+          <div class="timezone-card">
+            <label class="timezone-copy" for="dataTimezone"><strong>Data timezone</strong><small>Timezone used by the opening timestamps</small></label>
+            <select id="dataTimezone" aria-label="Trade data timezone">
+              <option value="Asia/Kolkata">Asia/Kolkata · UTC+05:30</option>
+              <option value="UTC">UTC · UTC+00:00</option>
+              <option value="America/New_York">New York · UTC−05:00/−04:00</option>
+              <option value="Europe/London">London · UTC+00:00/+01:00</option>
+              <option value="Asia/Tokyo">Tokyo · UTC+09:00</option>
+              <option value="Asia/Dubai">Dubai · UTC+04:00</option>
+              <option value="Australia/Sydney">Sydney · UTC+10:00/+11:00</option>
+            </select>
+          </div>
         </div>
         <div id="importStatus" role="status" aria-live="polite"></div>
         <div hidden aria-hidden="true">
@@ -516,7 +526,7 @@
 
 <dialog id="calendarChoice" class="calendar-choice" aria-labelledby="calendarChoiceTitle">
   <h2 id="calendarChoiceTitle">Choose your calendar view</h2>
-  <p>Group each trade’s P&amp;L by its opening or closing date. Dates are read day-first: DD/MM/YYYY or DD/MM/YY.</p>
+  <p>Group each trade’s P&amp;L by its opening or closing date. Imported dates follow the format selected on the import screen.</p>
   <button type="button" class="ghost-btn" data-calendar-basis="opening">Opening date<small>See performance on the day you entered each trade.</small></button>
   <button type="button" class="primary-btn" data-calendar-basis="closing">Closing date<small>Use explicit closing data only; no estimated closes.</small></button>
   <button type="button" class="ghost-btn" id="calendarChoiceCancel">Cancel</button>
@@ -526,8 +536,11 @@ const TRADES = [];
 const SAMPLE_TRADES = [];
 const DOW_ORDER = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const TIMEZONE_LABELS=Object.fromEntries([...document.getElementById('dataTimezone').options].map(option=>[option.value,option.textContent]));
+const DATE_FORMATS=['DMY','MDY','YMD'];
 let JOURNAL_TIMEZONE='Asia/Kolkata';
 try{const saved=localStorage.getItem('onpoint-data-timezone');if(TIMEZONE_LABELS[saved])JOURNAL_TIMEZONE=saved;}catch(_error){}
+let JOURNAL_DATE_FORMAT='DMY';
+try{const saved=localStorage.getItem('onpoint-date-format');if(DATE_FORMATS.includes(saved))JOURNAL_DATE_FORMAT=saved;}catch(_error){}
 function openingWeekday(date){
   const match=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!match)return 'Undated';
   const [,year,month,day]=match.map(Number),stamp=new Date(Date.UTC(year,month-1,day));
@@ -584,11 +597,16 @@ function durationMinutes(value){
   if(days||hours||minutes||seconds)return days*1440+hours*60+minutes+seconds/60;
   return numeric(raw);
 }
-function expandDayFirstDate(value){
-  const raw=String(value??'').trim(),match=raw.match(/^(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(\d{4}|\d{2})(?=$|[T\s])/)||raw.match(/^(\d{1,2})\s*\/\s*(\d{1,2})(\d{4})(?=$|[T\s])/);if(!match)return null;
-  const day=Number(match[1]),month=Number(match[2]),shortYear=match[3];let year=Number(shortYear);if(shortYear.length===2)year+=year>=70?1900:2000;
+function parseFormattedDate(value){
+  const raw=String(value??'').trim(),match=raw.match(/^(\d{1,4})\s*([/.-])\s*(\d{1,2})\2\s*(\d{1,4})(?=$|[T\s])/);if(!match)return null;
+  const [,first,,middle,last]=match;let year,month,day;
+  if(first.length===4){year=Number(first);month=Number(middle);day=Number(last);}
+  else if(JOURNAL_DATE_FORMAT==='DMY'){day=Number(first);month=Number(middle);year=Number(last);}
+  else if(JOURNAL_DATE_FORMAT==='MDY'){month=Number(first);day=Number(middle);year=Number(last);}
+  else return null;
+  if(String(last).length===2&&first.length!==4)year+=year>=70?1900:2000;
   const check=new Date(Date.UTC(year,month-1,day));if(check.getUTCFullYear()!==year||check.getUTCMonth()!==month-1||check.getUTCDate()!==day)return null;
-  return `${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}/${year}`;
+  return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
 }
 function isoDate(value){
   if(value instanceof Date && !isNaN(value)) return `${value.getUTCFullYear()}-${String(value.getUTCMonth()+1).padStart(2,'0')}-${String(value.getUTCDate()).padStart(2,'0')}`;
@@ -597,8 +615,7 @@ function isoDate(value){
   const googleDate=raw.match(/^Date\s*\(\s*(\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})/i);
   if(googleDate){const year=Number(googleDate[1]),month=Number(googleDate[2])+1,day=Number(googleDate[3]),check=new Date(Date.UTC(year,month-1,day));if(check.getUTCFullYear()===year&&check.getUTCMonth()===month-1&&check.getUTCDate()===day)return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;return null;}
   const direct=raw.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/); if(direct){const year=Number(direct[1]),month=Number(direct[2]),day=Number(direct[3]),check=new Date(Date.UTC(year,month-1,day));if(check.getUTCFullYear()===year&&check.getUTCMonth()===month-1&&check.getUTCDate()===day)return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;return null;}
-  const dayFirst=expandDayFirstDate(raw);if(dayFirst){const [day,month,year]=dayFirst.split('/');return `${year}-${month}-${day}`;}
-  return null;
+  return parseFormattedDate(raw);
 }
 function journalDate(value){return isoDate(value);}
 function normalizedTime(value){
@@ -796,6 +813,13 @@ function setJournalTimezone(value,persist=true){
 }
 document.getElementById('dataTimezone').addEventListener('change',event=>setJournalTimezone(event.target.value));
 setJournalTimezone(JOURNAL_TIMEZONE,false);
+function setJournalDateFormat(value,persist=true){
+  if(!DATE_FORMATS.includes(value))return;JOURNAL_DATE_FORMAT=value;
+  const select=document.getElementById('dateFormat');if(select)select.value=value;
+  if(persist){try{localStorage.setItem('onpoint-date-format',value);}catch(_error){}}
+}
+document.getElementById('dateFormat').addEventListener('change',event=>setJournalDateFormat(event.target.value));
+setJournalDateFormat(JOURNAL_DATE_FORMAT,false);
 
 function fmtMoney(v){
   const s = Math.abs(v).toFixed(2);
